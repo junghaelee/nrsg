@@ -1,0 +1,23 @@
+rule "Publisher 502.a"
+        when
+                MARC."502" has any "a"
+        then
+                create pnx."display"."publisher" with MARC."502" subfields "a"
+end
+
+rule "Publisher 502.b,c,g"
+        when
+                MARC."502" has any "b,c,g" AND NOT
+                MARC."502"."g" match "*thesis*"
+        then
+                set TEMP"1" to MARC."502" subfields "b"
+                remove substring using regex (TEMP"1","^+$")
+                add prefix (TEMP"1","Thesis(")
+                add suffix (TEMP"1",")")
+                set TEMP"2" to MARC."502" subfields "c"
+                set TEMP"3" to MARC."502" subfields "g"
+                concatenate with delimiter (TEMP"1",TEMP"2","--")
+                concatenate with delimiter (TEMP"1",TEMP"3",";")      
+                create pnx."display"."publisher" with TEMP"1"
+end
+
